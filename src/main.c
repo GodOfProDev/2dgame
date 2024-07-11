@@ -74,11 +74,17 @@ int main(int argc, char **argv) {
             }
         }
 
-        SDL_BlitSurface(gCurrentSurface, NULL, gScreenSurface, NULL);
+        SDL_Rect stretchRect = {
+            0,
+            0,
+            SCREEN_WIDTH,
+            SCREEN_HEIGHT
+        };
+
+        SDL_BlitScaled(gCurrentSurface, NULL, gScreenSurface, &stretchRect);
 
         SDL_UpdateWindowSurface(gWindow);
     }
-
 
     close();
 
@@ -107,35 +113,35 @@ bool loadMedia() {
     bool success = true;
 
     //Load default surface
-    gKeyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT] = loadSurface("res/press.bmp");
+    gKeyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT] = loadSurface("../res/press.bmp");
     if (gKeyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT] == NULL) {
         printf("Failed to load default image!\n");
         success = false;
     }
 
     //Load up surface
-    gKeyPressSurfaces[KEY_PRESS_SURFACE_UP] = loadSurface("res/up.bmp");
+    gKeyPressSurfaces[KEY_PRESS_SURFACE_UP] = loadSurface("../res/up.bmp");
     if (gKeyPressSurfaces[KEY_PRESS_SURFACE_UP] == NULL) {
         printf("Failed to load up image!\n");
         success = false;
     }
 
     //Load down surface
-    gKeyPressSurfaces[KEY_PRESS_SURFACE_DOWN] = loadSurface("res/down.bmp");
+    gKeyPressSurfaces[KEY_PRESS_SURFACE_DOWN] = loadSurface("../res/down.bmp");
     if (gKeyPressSurfaces[KEY_PRESS_SURFACE_DOWN] == NULL) {
         printf("Failed to load down image!\n");
         success = false;
     }
 
     //Load left surface
-    gKeyPressSurfaces[KEY_PRESS_SURFACE_LEFT] = loadSurface("res/left.bmp");
+    gKeyPressSurfaces[KEY_PRESS_SURFACE_LEFT] = loadSurface("../res/left.bmp");
     if (gKeyPressSurfaces[KEY_PRESS_SURFACE_LEFT] == NULL) {
         printf("Failed to load left image!\n");
         success = false;
     }
 
     //Load right surface
-    gKeyPressSurfaces[KEY_PRESS_SURFACE_RIGHT] = loadSurface("res/right.bmp");
+    gKeyPressSurfaces[KEY_PRESS_SURFACE_RIGHT] = loadSurface("../res/right.bmp");
     if (gKeyPressSurfaces[KEY_PRESS_SURFACE_RIGHT] == NULL) {
         printf("Failed to load right image!\n");
         success = false;
@@ -146,7 +152,7 @@ bool loadMedia() {
 
 void close() {
     SDL_FreeSurface(gCurrentSurface);
-    gCurrentSurface= NULL;
+    gCurrentSurface = NULL;
 
     for (int i = 0; i < KEY_PRESS_SURFACE_TOTAL; ++i) {
         auto surface = gKeyPressSurfaces[i];
@@ -161,10 +167,21 @@ void close() {
 }
 
 SDL_Surface *loadSurface(char *path) {
+    SDL_Surface *optimizedSurface = NULL;
+
     SDL_Surface *loadedSurface = SDL_LoadBMP(path);
     if (loadedSurface == NULL) {
-        printf("Unable to load imaeg %s! SDL_Error: %s\n", path, SDL_GetError());
+        printf("Unable to load image %s! SDL_Error: %s\n", path, SDL_GetError());
+        return NULL;
     }
 
-    return loadedSurface;
+    optimizedSurface = SDL_ConvertSurface(loadedSurface, gScreenSurface->format, 0);
+    if (optimizedSurface == NULL) {
+        printf("Unable to optimize image %s! SDL Error: %s\n", path, SDL_GetError());
+        return NULL;
+    }
+
+    SDL_FreeSurface(loadedSurface);
+
+    return optimizedSurface;
 }
