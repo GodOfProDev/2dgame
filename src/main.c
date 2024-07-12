@@ -41,7 +41,6 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-
     bool quit = false;
 
     SDL_Event e;
