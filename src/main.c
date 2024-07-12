@@ -1,5 +1,8 @@
-#include <stdio.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+
+#include <stdio.h>
+#include <string.h>
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -104,6 +107,12 @@ bool init() {
         return false;
     }
 
+    int imgFlags = IMG_INIT_PNG;
+    if (!IMG_Init(imgFlags) & imgFlags) {
+        printf("SDL_Image could not initialize! SDL_Error: %s\n", IMG_GetError());
+        return false;
+    }
+
     gScreenSurface = SDL_GetWindowSurface(gWindow);
 
     return true;
@@ -170,9 +179,9 @@ void close() {
 SDL_Surface *loadSurface(char *path) {
     SDL_Surface *optimizedSurface = NULL;
 
-    SDL_Surface *loadedSurface = SDL_LoadBMP(path);
+    SDL_Surface *loadedSurface = IMG_Load(path);
     if (loadedSurface == NULL) {
-        printf("Unable to load image %s! SDL_Error: %s\n", path, SDL_GetError());
+        printf("Unable to load image %s! SDL_Error: %s\n", path, IMG_GetError());
         return NULL;
     }
 
