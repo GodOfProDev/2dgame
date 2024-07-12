@@ -151,14 +151,15 @@ bool loadMedia() {
 }
 
 void close() {
-    SDL_FreeSurface(gCurrentSurface);
-    gCurrentSurface = NULL;
-
     for (int i = 0; i < KEY_PRESS_SURFACE_TOTAL; ++i) {
-        auto surface = gKeyPressSurfaces[i];
-        SDL_FreeSurface(surface);
-        surface = NULL;
+        SDL_Surface **surface = &gKeyPressSurfaces[i];
+        SDL_FreeSurface(*surface);
+        *surface = NULL;
     }
+
+    // We already know the surface it's pointing to is free-ed and is NULL so we can safely
+    // set this to NULL as well
+    gCurrentSurface = NULL;
 
     SDL_DestroyWindow(gWindow);
     gWindow = NULL;
